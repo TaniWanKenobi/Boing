@@ -14,10 +14,10 @@ cturing Information (PMI)---4.0---2014-10-13',
 /* implementation_level */ '2;1');
 
 FILE_NAME(
-/* name */ '69911197f059ee7d750e825c',
+/* name */ 'Boing_Enclosure',
 /* time_stamp */ '2026-02-15T00:21:48Z',
-/* author */ (''),
-/* organization */ (''),
+/* author */ ('Tanishq Goyal'),
+/* organization */ ('Boing'),
 /* preprocessor_version */ 'ST-DEVELOPER v20',
 /* originating_system */ 'ONSHAPE BY PTC INC, 1.210',
 /* authorisation */ '  ');

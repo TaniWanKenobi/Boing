@@ -1,103 +1,134 @@
-<a id="readme-top"></a>
+# Boing
 
-<p align="center">
-  <a href="https://www.kicad.org">
-    <img src="https://img.shields.io/badge/KiCad-PCB%20Design-314CB0?style=for-the-badge&logo=kicad&logoColor=white" alt="KiCad">
-  </a>
-  <a href="https://www.onshape.com">
-    <img src="https://img.shields.io/badge/Onshape-CAD%20Design-00B0F0?style=for-the-badge&logo=onshape&logoColor=white" alt="Onshape">
-  </a>
-</p>
+[![KiCad](https://img.shields.io/badge/KiCad-PCB%20Design-314CB0?style=for-the-badge&logo=kicad&logoColor=white)](https://www.kicad.org)
+[![Onshape](https://img.shields.io/badge/Onshape-CAD%20Design-00B0F0?style=for-the-badge&logo=onshape&logoColor=white)](https://www.onshape.com)
+[![ESP32](https://img.shields.io/badge/ESP32--C6-Firmware-E7352C?style=for-the-badge&logo=espressif&logoColor=white)](https://www.espressif.com)
 
-<br />
+![Boing virtual pet](assets/images/hero.png)
 
-<div align="center">
-  <img src="https://user-cdn.hackclub-assets.com/019c61d4-620e-7542-a8d1-97414da3658a/image_2.png" alt="Tamagotchi" width="300">
-</div>
+A handheld virtual pet built from scratch — custom PCB, 3D-printed enclosure, and C++ firmware running on a XIAO-ESP32-C6. Feed it, play with it, put it to sleep. Neglect it and it sulks.
 
-<h3 align="center">Tamagotchi</h3>
+---
 
-<p align="center">
-  A custom PCB-based Tamagotchi virtual pet built with the XIAO-ESP32-C6!
-</p>
+## What's inside
 
+```text
+Boing/
+├── firmware/           Arduino sketch (flash this)
+│   ├── firmware.ino    Entry point
+│   ├── config.h        Pin mapping and tuning constants
+│   ├── pet.h / .cpp    Pet model — vitals, life stage, mood
+│   ├── input.h / .cpp  Debounced button input
+│   ├── audio.h / .cpp  Non-blocking melody sequencer
+│   ├── renderer.h / .cpp  OLED display driver
+│   └── sprites.h / .cpp   Pixel art bitmaps
+├── hardware/
+│   ├── pcb/            KiCad schematic + PCB layout
+│   ├── cad/            STEP file for the enclosure
+│   └── BOM.csv         Parts list with prices
+├── docs/
+│   ├── ARCHITECTURE.md  Firmware design decisions
+│   ├── build_guide.md   PCB assembly and enclosure guide
+│   └── firmware_guide.md  How to modify the firmware
+├── legacy/
+│   └── Tamagotchi.ino  Original single-file sketch (kept for reference)
+└── assets/images/      Screenshots and photos used in this README
+```
 
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-        <li><a href="#pcb-design">PCB Design</a></li>
-        <li><a href="#3d-model">3D Model</a></li>
-        <li><a href="#bom">BOM</a></li>
-      </ul>
-    </li>
-    <li><a href="#contact">Contact</a></li>
-  </ol>
-</details>
+---
 
-## About The Project
+## Getting started
 
-<div align="center">
-  <img
-    width="300"
-    alt="CAD"
-    src="https://cdn.hackclub.com/019c5fac-ddf2-7757-8007-5006abfd3ed3/image.png"
-  >
-</div>
+### Flash the firmware
 
-A custom PCB-based Tamagotchi virtual pet built with the XIAO-ESP32-C6 microcontroller, featuring a 0.96" OLED display, three buttons, and a buzzer.
+1. Install the [Arduino IDE](https://www.arduino.cc/en/software) and the ESP32 board package.
+2. Install **Adafruit SSD1306** and **Adafruit GFX** via the Library Manager.
+3. Open `firmware/firmware.ino` — the IDE will pick up all `.h`/`.cpp` files in the folder automatically.
+4. Select **XIAO_ESP32C6** as the board and flash.
 
-I made the project to have my own completely customizable tamagatchi! I also want you to customize yours however you want - check my [tutorial](/tutorial.md) for instructions! 
+### Buttons
 
-To use this, simply flash the xiao with the firmware in the repo! Here is an assembly diagram:
+| Button | Action | Effect |
+| ------ | ------ | ------ |
+| A (left) | Feed | +10% hunger |
+| B (middle) | Play | +10% joy, −5% energy |
+| C (right) | Rest | +15% energy |
 
-![assembly](https://cdn.hackclub.com/019c5fac-e2db-73dc-9d46-40b499d3461a/image.png)
+Stats decay continuously. Decay accelerates as a stat drops — a starving pet goes downhill faster than a content one.
 
-### PCB Design
+---
 
-Here is my PCB:
+## Hardware
 
-![PCB](https://cdn.hackclub.com/019c6204-37f0-7f26-b799-d78033114914/image.png)
+### PCB
 
-![Front 3D model](https://cdn.hackclub.com/019c620d-1a3f-7437-9949-082abc42662f/image.png)
+The board is a two-layer design made in KiCad. Order from JLCPCB using the files in `hardware/pcb/` — the Gerbers are ready to go.
 
-![Back 3D model](https://cdn.hackclub.com/019c620d-85d2-77bf-ab17-89be2fc27427/image.png)
+![PCB layout](assets/images/pcb_layout.png)
 
+![PCB 3D front](assets/images/pcb_3d_front.png) ![PCB 3D back](assets/images/pcb_3d_back.png)
 
-Here is the schematic used to make the PCB:
+### Schematic
 
-![Schematic](https://cdn.hackclub.com/019c63fe-8ef9-76ef-9bf1-9b4166a678af/image.png)
+![Schematic](assets/images/schematic.png)
 
-### 3D Model
+### Enclosure
 
-![3D Model Front](https://cdn.hackclub.com/019c5fac-e06f-7e0d-a838-a7901d9d6536/image.png)
+The shell is designed in Onshape and printed in two halves held together with M3 screws and brass inserts.
 
-Here is the [Onshape link](https://cad.onshape.com/documents/fa5791d8e7f345b436054923/w/ad8e09905eb572b0a8a40e9d/e/e81f06aa82a76dd04f8e6832?renderMode=0&uiState=699271dcf72b31b660e722c3)!
+![Enclosure front](assets/images/enclosure_front.png) ![Enclosure CAD](assets/images/enclosure_cad.png)
 
-### BOM
+[Open in Onshape](https://cad.onshape.com/documents/fa5791d8e7f345b436054923/w/ad8e09905eb572b0a8a40e9d/e/e81f06aa82a76dd04f8e6832)
 
-| Component | Qty | Price | Tax (6.7%) | Total | Link |
-|-----------|-----|-------|------------|-------|------|
-| XIAO-ESP32-C6 | 1 | $5.20 | $0.35 | $5.55 | [Seeed Studio](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html) |
-| Seeed Studio Shipping | 1 | $6.69 | $0.45 | $7.14 | — |
-| 0.96" OLED Display | 1 | $2.15 | $0.14 | $2.29 | [LCSC](https://www.lcsc.com/product-detail/C5248080.html) |
-| Tactile Button | 3 | $0.50 | $0.03 | $0.53 | [LCSC](https://www.lcsc.com/product-detail/C2888493.html) |
-| Buzzer | 1 | $0.54 | $0.04 | $0.58 | [LCSC](https://www.lcsc.com/product-detail/C49246964.html) |
-| Male Pin Headers (20 pcs) | 1 | $0.59 | $0.04 | $0.63 | [LCSC](https://www.lcsc.com/product-detail/C49261205.html) |
-| LCSC Shipping | 1 | $14.73 | $0.99 | $15.72 | — |
-| JLCPCB PCB | 1 | $5.40 | $0.36 | $5.76 | [JLCPCB](https://jlcpcb.com/) |
-| JLCPCB Shipping | 1 | $3.30 | $0.22 | $3.52 | — |
-| M3 8mm Screws | 1 | $2.28 | $0.15 | $2.43 | [AliExpress](https://www.aliexpress.us/item/3256809831708799.html) |
-| Brass Threaded Inserts | 1 | $5.79 | $0.39 | $6.18 | [AliExpress](https://www.aliexpress.us/item/3256806286648221.html) |
-| | | | | | |
-| **Total** | | **$47.17** | **$3.16** | **$50.33** | |
+### Assembly
+
+![Assembly diagram](assets/images/assembly.png)
+
+Full step-by-step instructions are in [docs/build_guide.md](docs/build_guide.md).
+
+---
+
+## Bill of materials
+
+| Component | Qty | Unit price | Total |
+| --------- | --- | ---------- | ----- |
+| XIAO ESP32-C6 | 1 | $7.09 | $7.09 |
+| 0.96" OLED display | 1 | $1.93 | $1.93 |
+| Pin headers | 1 | $1.69 | $1.69 |
+| Passive buzzer (12×9.5 mm) | 1 | $2.39 | $2.39 |
+| Tactile buttons (4.5×4.5 mm) | 1 pack | $2.57 | $2.57 |
+| Brass threaded inserts (M3×4×5) | 1 pack | $2.47 | $2.47 |
+| M3 8 mm screws | 1 pack | $2.23 | $2.23 |
+| AliExpress shipping | — | $2.53 | $2.53 |
+| PCB (JLCPCB, 5×) | 1 | $3.20 | $3.20 |
+| JLCPCB shipping | — | $3.12 | $3.12 |
+| **Total (inc. tax)** | | | **~$31** |
+
+Full links are in [hardware/BOM.csv](hardware/BOM.csv).
+
+---
+
+## Firmware overview
+
+The firmware splits cleanly into modules — no global state, event-driven input, float vitals with exponential decay, and a four-stage life cycle (egg → juvenile → adult → elder).
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full design breakdown.
+
+---
+
+## Customise it
+
+Everything tuneable is in one file: [`firmware/config.h`](firmware/config.h).
+
+- **Decay speed** — `Tuning::DECAY_BASE` and `DECAY_EXPONENT`
+- **Action effects** — `FEED_DELTA`, `PLAY_JOY_DELTA`, `REST_DELTA`
+- **Life-stage thresholds** — `JUVENILE_AGE_S`, `ADULT_AGE_S`, `ELDER_AGE_S`
+- **Button mapping** — `HW::BTN_A/B/C`
+
+Want to add a new action? Add a method to `pet.h`, call it from the `onButton` switch in `firmware.ino`. That's it.
+
+---
 
 ## Contact
 
-
-Tanishq Goyal - @Tanuki - [tanishqgoyal590@gmail.com](mailto:tanishqgoyal590@gmail.com)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Tanishq Goyal — [@Tanuki](https://hackclub.slack.com) — [tanishqgoyal590@gmail.com](mailto:tanishqgoyal590@gmail.com)
