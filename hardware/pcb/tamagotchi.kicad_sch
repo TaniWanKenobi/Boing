@@ -2,6 +2,8 @@
 	(version 20260306)
 	(generator "eeschema")
 	(generator_version "10.0")
+	(author "Tanishq Goyal")
+	(company "Boing")
 	(uuid "e459ee3c-3bc1-45b9-8f17-1e732ed504eb")
 	(paper "A4")
 	(lib_symbols

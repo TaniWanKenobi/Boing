@@ -235,13 +235,13 @@
       "zones_allow_external_fillets": false
     },
     "ipc2581": {
-      "bom_rev": "",
-      "dist": "",
+      "bom_rev": "1.0",
+      "dist": "JLCPCB",
       "distpn": "",
-      "internal_id": "",
-      "mfg": "",
+      "internal_id": "BOING-PCB",
+      "mfg": "JLCPCB",
       "mpn": "",
-      "sch_revision": ""
+      "sch_revision": "1.0"
     },
     "layer_pairs": [],
     "layer_presets": [],
@@ -526,7 +526,7 @@
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "tamagotchi.step",
+      "step": "../cad/Tamagotchi.step",
       "svg": "",
       "vrml": ""
     },
