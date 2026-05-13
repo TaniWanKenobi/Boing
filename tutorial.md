@@ -1,0 +1,605 @@
+# Tamagotchi PCB Tutorial
+
+> **Note:** Your schematic should NOT look like this at the end of the tutorial! You are required to add your own components and switch it up to personalize it :D
+
+---
+
+## Table of Contents
+
+- [Installing KiCad](#installing-kicad)
+
+### 1. Schematic Design
+- [Creating the Schematic](#creating-the-schematic)
+  - [Importing the MCU](#importing-the-mcu)
+  - [Adding the OLED Display](#adding-the-oled-display)
+  - [Adding Buttons](#adding-buttons)
+  - [Adding a Buzzer](#adding-a-buzzer)
+  - [Power & Battery Setup](#power--battery-setup)
+  - [Assigning Footprints](#assigning-footprints)
+
+### 2. PCB Design
+- [Creating the PCB](#creating-the-pcb)
+  - [Defining the Board Outline](#defining-the-board-outline)
+  - [Component Placement](#component-placement)
+- [Button Footprint Mismatch](#button-footprint-mismatch)
+- [PCB Routing](#pcb-routing)
+  - [Routing Traces](#routing-traces)
+- [Customization](#customization)
+- [Run Design Rules Check](#run-design-rules-check)
+  - [Common DRC Errors](#common-drc-errors)
+
+### 7. Files & Version Control
+- [Add Your Files to Your GitHub Repo](#add-your-files-to-your-github-repo)
+- [Upload Your Files to GitHub](#upload-your-files-to-github)
+  - [Edit Your README](#edit-your-readme)
+
+### 8. Fabrication
+- [Getting a JLCPCB Price](#getting-a-jlcpcb-price)
+  - [Settings](#settings)
+
+### 9. Enclosure Design
+- [Designing the Case](#designing-the-case)
+
+---
+
+## Installing KiCad
+
+Download KiCad from the official site: **[https://www.kicad.org/download/](https://www.kicad.org/download/)**
+
+1. Go to the download page and select your operating system (Windows, macOS, or Linux).
+2. Download the latest **stable release** (KiCad 10.x).
+3. Run the installer and follow the on-screen instructions (the defaults are fine).
+4. When prompted, make sure to **install the default libraries** (they're selected by default).
+5. Launch KiCad and create a new project (**File → New Project** or **Ctrl+N**).
+
+What are the default libraries?
+
+> KiCad ships with a large set of schematic symbols, PCB footprints, and 3D models. These cover most common components (resistors, capacitors, connectors, etc.) so you don't have to create them from scratch. You'll still need to import specialty parts (like the XIAO or OLED), but the defaults cover the basics.
+
+> **New to KiCad?** Read the official getting started guide before continuing:
+> [KiCad 10.0: Getting Started](https://docs.kicad.org/10.0/en/getting_started_in_kicad/getting_started_in_kicad.html)
+
+---
+
+## Creating the Schematic
+
+The XIAO-ESP32-C3 will be used as the MCU in this guide! This is because it's tiny and includes WiFi, Bluetooth, and built‑in battery charging, which makes it perfect for this.
+
+What is an MCU?
+
+> MCU stands for **Microcontroller Unit**, the tiny computer (brain) of your project. It runs your code and controls all the other components (display, buttons, buzzer, etc.). The XIAO-ESP32-C3 is the MCU we're using here.
+>
+> That said, other MCUs are worth knowing about. The RP2040 is a good pick if you don't need wireless: dual-core, and has really good documentation! The nRF52840 is the go-to for low power BLE projects, with sleep currents that blow the ESP32 out of the water. For this project the C3 wins because it's affordable, has WiFi and BLE built in, and includes onboard LiPo charging so no external charger chip is needed.I use the C3 for those reasons.
+
+Useful schematic editor keybinds
+
+> | Key | Action |
+> |-----|--------|
+> | **A** | Add a symbol (component) |
+> | **W** | Draw a wire |
+> | **P** | Add a power symbol (VCC, GND, 3V3, etc.) |
+> | **L** | Add a net label |
+> | **M** | Move a component |
+> | **R** | Rotate a component |
+> | **G** | Grab/drag a component (keeps wires attached) |
+> | **E** | Edit component properties |
+> | **C** | Copy a component |
+> | **Delete** | Delete selected item |
+> | **Ctrl+Z** | Undo |
+> | **Ctrl+S** | Save |
+
+### Importing the MCU
+
+First, I imported the XIAO-ESP32-C3 from the [SeeedStudio Wiki](https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started/). Here's an [excellent tutorial](https://www.youtube.com/watch?v=lnCvyGIQong) on using it!
+
+I downloaded from this:
+
+![](https://cdn.hackclub.com/019d848c-2e6a-7afd-ab8b-fc6f28d32ac7/image.png)
+
+I then clicked **A** (Add Symbol), searched for the part, and imported it. I ended up with this:
+
+![Xiao](https://cdn.hackclub.com/019d985d-8af2-746a-901e-c897ece4b3fa/image.png)
+
+Most symbols won't label every pin with its function (SDA, SCL, MOSI, etc.) They'll just show pin numbers. When that happens, google the MCU name + "pinout" to find the official diagram and cross-reference which pin number maps to which function :D 
+
+**Now, for this tutorial, I will create the base Tamagotchi. Spice your own Tamagotchi up more than this one! Add some flavor!**
+
+I then connect GND to GND, 5V to +5V, 3V3 to  and BAT to + as shown below:
+
+![Power connections](https://files.catbox.moe/kgmyi6.png)
+
+**Why didn't I connect the top pads?**
+
+![](https://files.catbox.moe/ozimcj.png)
+
+I didn't connect them because I don't need JTAG debugging for this project. A JTAG debug cable is a special cable that connects your computer to these pads, letting you pause your program mid-run and inspect exactly what's happening inside the chip line by line. USB-C handles everything we need here.
+
+You may use them if you want, but I didn't because it would complicate the PCB for not much benefit. You might want to use them if you have a really tricky bug that Serial printing can't help you catch, or if you run out of GPIO pins and need extras.
+
+### Adding the OLED Display
+
+I then added the [0.96" OLED](https://www.lcsc.com/product-detail/C5248080.html) via EasyEDA to KiCad. Follow this [guide](https://hwdocs.hackclub.dev/user-contrib-guides/easyeda2kicad/)!
+
+I connected GND to GND, SDA to SDA, and SCL to SCL. Use **W** to draw wires between pins!
+
+What are SDA, SCL, and GND?
+
+> - **GND** = Ground, the common reference point for all electrical signals.
+> - **SDA** = Serial Data, the line that carries data back and forth over I2C.
+> - **SCL** = Serial Clock, the line that provides the timing signal for I2C communication.
+>
+> I2C is a protocol that lets multiple devices talk over just two wires (SDA + SCL).
+
+Do I need pull-up resistors on SDA and SCL?
+
+> Normally yes. I2C requires pull‑up resistors on SDA and SCL; however, the XIAO boards already include internal pull‑ups, so you don't need external ones here.
+
+I checked the [datasheet](https://www.lcsc.com/datasheet/C5248080.pdf) attached on the LCSC page and found that VCC should be connected to 3V3.
+
+![](https://github.com/user-attachments/assets/15b279c4-acc2-40db-b04b-2e664e778855)
+
+I therefore connected it as such
+
+![](https://files.catbox.moe/34nu2g.png)
+
+### Adding Buttons
+
+Since a Tamagotchi has three buttons, I decided to add those as well!
+
+For this, I decided to use an **active‑low** button layout (which is the most common approach).
+
+What does "active-low" mean?
+
+> "Active-low" means the button is considered "pressed" when the signal goes LOW (0V / GND). When the button is not pressed, the internal pull-up resistor keeps the pin HIGH (3.3V). This is the most common button wiring approach because it's simple: you only need the button and a ground connection, no extra resistors.
+
+Each button connects one side to **GND** and the other to a **GPIO pin** with the XIAO's **internal pull‑up** enabled. This makes the pin read **HIGH** when the button is idle, and **LOW** when the button is pressed.
+
+![](https://files.catbox.moe/bclgxg.png)
+
+What is a GPIO pin?
+
+> GPIO stands for **General Purpose Input/Output**. These are the programmable pins on your microcontroller that can be configured as either inputs (to read sensors/buttons) or outputs (to drive LEDs/buzzers). On the XIAO, pins like D0–D10 are GPIOs.
+
+### Adding a Buzzer
+
+I also added a buzzer from [here](https://www.lcsc.com/product-detail/C49246964.html)!
+
+The buzzer is wired with one pin to a GPIO output and the other to GND, letting the GPIO drive it with a square‑wave tone.
+
+![](https://files.catbox.moe/4ksaud.png)
+
+### Power & Battery Setup
+
+I then added the battery.
+
+The XIAO ESP32C3 has built-in battery charging, so all you need to do is connect a LiPo battery directly to the BAT pin. This lets the board run wirelessly and automatically charges the battery whenever you plug in USB-C.
+
+BAT is connected only to the battery because it is a dedicated charging pin, separate from the main 3.3V power rail. GND however is shared across everything on the board, since all components need a common ground reference to work correctly.
+
+![](https://files.catbox.moe/wbgbys.png)
+
+> **Don't forget to place no-connect flags where there aren't connections!**
+
+Press `Q` → click the pin to place the no-connect flag
+
+![](https://files.catbox.moe/3dtovm.png)
+
+> **Note:** In schematics, inputs are generally placed on the left and outputs on the right. This is a common convention that makes your schematic easier to read, since signal flow goes left to right just like reading a book. You don't have to follow this strictly, but it is good practice to keep things consistent!
+
+### Assigning Footprints
+
+This is my final schematic! Let's make the PCB now. First, let's assign parts. Click this:
+
+![](https://github.com/user-attachments/assets/7fdab501-5c92-4df0-b032-ab40fdc7018a)
+
+Then assign the corresponding EasyEDA / OPL parts! For the buttons, import from [here](https://www.lcsc.com/product-detail/C2888493.html)!
+
+1. **Battery connector:** I use 2.54mm male headers, since 2.54mm is the standard pin spacing used on most hobby electronics and battery connectors.
+2. **Buzzer:** According to the [AliExpress listing](https://www.aliexpress.us/item/3256810135642750.html) I am ordering from, the buzzer is 12x9.5mm, where 12mm is the diameter and 9.5mm is the pin spacing. This fits the `Buzzer_12x9.5RM7.6` footprint. Note that the EasyEDA buzzer footprint uses a pin spacing of 7mm instead of 9.5mm, so make sure to use the correct one!
+3. **Buttons:** Imported from the link above.
+4. **XIAO:** I use a mix of SMD and DIP footprint from the [footprint library](https://files.seeedstudio.com/wiki/XIAO-KiCad-Library/New_XIAO_Series_Footprints.zip) linked earlier. I will later modify the footprint so the SMD pads are through-hole, allowing me to solder the XIAO directly by melting solder into the pads. The name of this footprint is `XIAO-ESP32-C3-DIP-SMD`.
+5. **OLED:** Imported from EasyEDA using the link from earlier.
+
+![Footprint assignment](https://files.catbox.moe/mfchm6.png)
+
+Now, press this and open the PCB viewer:
+
+![Open PCB viewer](https://github.com/user-attachments/assets/5bbc50fa-dbe2-4ab1-b301-5c360a974529)
+
+---
+
+## Creating the PCB
+
+**The maximum size of your PCB should be 100mm²!**
+
+You should see something like this:
+
+![PCB editor](https://cdn.hackclub.com/019dae27-a243-7319-835c-ff4e05737e34/screenshot_2026-04-20_225259.png)
+
+To synchronize changes between your schematic and PCB layout in KiCad:
+
+- Press **F8**, *or*
+- Click the **Update PCB from Schematic** button
+
+You can do this anytime you want to refresh the PCB with the latest schematic updates.
+
+What are those two circles?
+> Those are M3 mounting holes! Click A to add them!
+
+### Defining the Board Outline
+
+You'll notice a white outline surrounding the entire board. This is the **Edge Cuts** layer, which defines the physical boundary where the PCB will be cut.
+
+This is done by modifying the `Edge.Cuts` layer on the right side. There are many ways to do this, such as manually drawing it with the given menu.
+
+I found the default outline options limiting and wanted to create something more complex. To do this, I:
+
+1. Drew out the edge cuts layer. I just did this on figma, you can do this anywhere!!!
+2. Converted the image into a DXF file using an image-to-DXF converter.
+3. Imported the DXF file into KiCad.
+4. Created a 100×100 mm box as a reference.
+5. Used the measuring tool to determine the correct scale.
+6. Scaled the outline down so it fit within 100 mm.
+
+![cutout](https://cdn.hackclub.com/019d6fcf-c1dc-7c1b-be3c-a8aac74ded7a/image.png)
+
+You can also use the kicad tools on the right to draw a barrier, they work well! I just wanted to make a cool and unique border. You should try it!
+
+![](https://cdn.hackclub.com/019d6fd1-62ad-753b-81ce-07980f6496e3/image.png)
+
+### Component Placement
+
+**First, I laid my PCB out in a 100×100 box.**
+
+Place all of your components inside the board outline. Move components to shorten **ratlines**, which are the straight blue lines.
+
+- **M**: Move a component
+- **R**: Rotate a component
+- **F**: Flip a component to the other side of the board
+- **Ctrl+S** / **⌘+S**: Save (do this often!)
+
+What are ratlines?
+
+> Ratlines (also called "ratsnest lines") are the thin straight lines that show unrouted connections between pads. They indicate which pads need to be connected with copper traces. Your goal is to arrange components so these lines are as short as possible and don't cross each other, which makes routing much easier.
+
+Heres what I ended up with!
+
+![](https://files.catbox.moe/hww8o3.png)
+
+---
+
+## Button Footprint Mismatch
+
+> **Always verify your footprint before finalizing your PCB layout.** Even if a component looks correct in the schematic, the footprint may have incorrect pad numbering that causes your circuit to fail silently. A common red flag: any pin without a net almost always means something went wrong during import.
+
+### Why This Happens
+
+After importing a button from EasyEDA into KiCad, the footprint may look fine at first glance:
+
+![KiCad imported switch footprint](https://cdn.hackclub.com/019d64e0-1e84-77a2-b640-9ae44ec2f111/image.png)
+
+EasyEDA uses a **redundant 4-pin symbol**, showing all four pins separately even though two pairs are internally shorted:
+
+![EasyEDA button symbol](https://cdn.hackclub.com/019d64e1-af44-78ba-9264-cd050bf0913b/image.png)
+
+KiCad uses a **cleaner 2-pin representation**:
+
+![KiCad button symbol](https://cdn.hackclub.com/019d64e4-065a-7b78-947d-76c2c4166b31/image.png)
+
+When imported, EasyEDA's pins 1 and 2 map to opposite footprint pads, but on a tactile switch they're on the **same physical side** (internally shorted). This means pads that should be electrically separated end up sharing a net, and the button does nothing because one side is permanently shorted to itself.
+
+| EasyEDA pins | Physical side | KiCad net |
+|:---:|:---:|:---:|
+| 1, 2 | Side A (shorted) | Net 1 |
+| 3, 4 | Side B (shorted) | Net 2 |
+
+The switch connects **Side A to Side B** when pressed. The footprint must reflect this.
+
+### Confirming with the Datasheet
+
+Verify the pinout using the component's datasheet. If sourcing from LCSC, the datasheet is available directly on the product page. For example:
+
+- [Product page](https://www.lcsc.com/product-detail/C2888493.html)
+- [Datasheet](https://www.lcsc.com/datasheet/C2888493.pdf)
+
+![Physical pin diagram](https://cdn.hackclub.com/019d64f2-0ab2-7a97-a6a2-c0e4637bd711/image.png)
+![Internal schematic](https://cdn.hackclub.com/019d64f2-5c5b-7c82-8d01-eba0fbff8d62/image.png)
+
+These confirm that **pads 1 and 2 are shorted** (Side A) and **pads 3 and 4 are shorted** (Side B).
+
+### Fixing the Pad Numbering
+
+Renumber the footprint pads to match the correct mapping:
+
+- Pads **1 and 2** (same physical side) → renumber both to **`1`**
+- Pads **3 and 4** (other physical side) → renumber both to **`2`**
+
+1. Double-click the footprint in the PCB editor and click **Edit Library Footprint**.
+
+![Edit Library Footprint dialog](https://cdn.hackclub.com/019d64f5-e570-70fe-a8fb-22ab0854085b/image.png)
+
+2. Double-click each pad hole and update the pad number to match the corrected mapping:
+
+![Corrected pad numbering](https://cdn.hackclub.com/019d64f7-c4ab-78f2-adc6-450d63ee774e/image.png)
+
+3. Press `Ctrl+S` to save.
+
+### Applying the Fix
+
+1. Go to **Tools > Update Footprint from Library**.
+
+![Update Footprint from Library menu](https://cdn.hackclub.com/019d64f9-6a84-7663-a0b4-69b215dbb021/image.png)
+
+2. Click **Update**.
+
+The footprint will refresh with the corrected pad numbering: one net on Side A, a separate net on Side B, and the switch bridging them when pressed.
+
+> Does this not work? Try deleting the buttons, and updating from schematic again :)
+
+![](https://cdn.hackclub.com/019d6529-b11d-7d96-830f-c7431f1d8092/image.png)
+
+We do something similar to the XIAO footprint.
+
+![Xiao](https://files.catbox.moe/5e2aze.png)
+
+Double click each BAT pad, set it to through-hole (THT), and give it a drill diameter of 0.889mm.
+
+![Fixing Footprint](https://cdn.hackclub.com/019dae19-2ecf-7620-a4d3-4fd2b2442dec/recording_2026-04-20_232848.gif)
+
+You may also notice that similar to the buttons, the pin numbers are wrong according to the official Seeed diagram:
+
+![Footprints](https://files.seeedstudio.com/wiki/XIAO_WiFi/back-label-6.png)
+
+Fix the pin numbers to match. Keep in mind that the footprint is mirrored, so if it helps, temporarily move it to the back layer so it is orientated the same way as the diagram.
+
+Here is the final result:
+
+![Final result](https://user-cdn.hackclub-assets.com/019dae24-0e74-7c16-9f29-a181bbd5ce82/image.png)
+
+Save and update your PCB from schematic when done!
+
+---
+
+## PCB Routing
+
+A PCB is made up of multiple layers. Our boards are "two-layer," meaning that they have two layers of copper wire.
+
+What are the PCB layers?
+
+> | Layer | Description |
+> |-------|-------------|
+> | **Top & bottom silkscreen** | The white ink layer where you can add art |
+> | **Top & bottom copper** | The layers where you make your copper wires |
+> | **Substrate** | The actual plastic (usually green) which makes up your board |
+> | **Via** | The tunnels which connect the top and bottom copper layers |
+>
+> ![PCB layers](https://cdn.hackclub.com/019c545f-32f8-71b8-9b46-079aee118944/c2ec73f247fdb1f466903fc86d345fe0f4b47b6f_image.webp)
+
+### Routing Traces
+
+Now it's time to route the PCB! Hit **X** on your keyboard and click anything with a thin blue line poking out of it. It should dim the entire screen, show you which direction you need to go with a thin blue line, and highlight the destination:
+
+![Routing example](https://cdn.hackclub.com/019c5460-5bb4-737a-8875-2d15ef8f3715/image.png)
+
+**Key routing shortcuts:**
+
+- **X**: Start routing a trace
+- **V**: Add a via (switch trace to the other side of the board mid-route)
+- **Backspace**: Delete the last trace segment while routing
+- **Esc**: Cancel the current route
+- **D**: Drag a trace (reposition it without breaking connections)
+- **U**: Select the entire trace from the point you click
+
+Join the highlighted points together. If there isn't enough space on the front side, or there is a trace already present that is blocking you, you can route on the back side by clicking **B.Cu** on the right toolbar. If you want to change sides during routing, press **V** and a via will be added, which will transfer your trace to the other side of the board.
+
+> **Important:** Wires and pads of different colors (except golden) can't be connected together directly! You must use a via to the other side.
+
+What is a via?
+
+> A via is a small plated hole that connects a copper trace on one layer of the board to a trace on another layer. Think of it as a tiny tunnel through the PCB. You use them when you can't route a trace on one side because another trace is in the way. Press **V** while routing to drop a via and continue the trace on the other side.
+
+Your routing is complete!
+
+![Ground plane](https://cdn.hackclub.com/019dafaa-d994-786e-ba6d-d783085a964c/screenshot_2026-04-21_061717.png)
+
+> **Tip:** Place everything based on what shortens the blue lines, and what makes them not cross!
+
+> **Tip:** Use a [ground plane](https://www.kicadtips.com/how-to/make-a-ground-plane) to help with routing and to reduce noise. That's what the red and blue layers are for! It's not necessary, but looks nice and is easy to set up!
+
+> **Note:** You may notice [stitching vias](https://resources.altium.com/p/everything-you-need-know-about-stitching-vias) in my board (the small holes scattered across the ground plane). **You do NOT need to add these.** They are completely optional for a board like this!
+>
+> ![Stitching vias](https://cdn.hackclub.com/019db096-d966-7e5a-9882-bcdcac8dcf61/image.png)
+
+---
+
+## Customization
+
+You may have already added some text and art to customize your board like me. If not, you can click **F.Silkscreen** and use the text tool.
+
+![Sample text](https://cdn.hackclub.com/019c546c-c7b1-7df9-b96b-68dae071b550/image.png)
+
+To add art, select the **Top Silkscreen Layer** or **Bottom Silkscreen Layer** in the sidebars, then use the KiCad image converter to add custom art.
+
+![KiCad image converter](https://kicad-info.s3.dualstack.us-west-2.amazonaws.com/original/3X/a/3/a3b5fba9b9455697b0d861d48a028c571ec44403.png)
+
+Your board is now beautiful! 
+
+---
+
+## Run Design Rules Check
+
+**DRC** stands for **Design Rules Check**. This runs a check that makes sure your board has no interference errors, no components are off the board, and no wires are intersecting. It does **not**, however, confirm that your board works.
+
+![DRC](https://cdn.hackclub.com/019c5876-0777-7c3f-9817-931007221588/27ae0765082623ea2988bbe01ce8cb8a4012b0b8_image.webp)
+
+Using the output, correct any errors. This can be confusing, so remember: you can always ask for help!
+
+What are common DRC errors?
+
+> - **Track and copper errors** : clearance violations, track width, annular rings
+> - **Via errors** : diameter, micro vias, blind/buried vias
+> - **Pad and footprint errors** : pad-to-pad, hole clearances
+> - **Edge and board outline errors** : copper edge clearance, silkscreen issues
+> - **Zone errors** : copper slivers, starved thermals, unconnected items
+> - **Net and connection errors** : missing connections, net conflicts
+> - **Courtyard errors** : overlaps, missing courtyards
+
+Once your PCB passes the DRC, it is finished!
+
+In the PCB editor, click **View → 3D Viewer** to see your finished work!
+
+![3D Viewer](https://cdn.hackclub.com/019db09a-41c2-7fad-9dfe-1083224eca73/image.png)
+
+> ![Final](https://cdn.hackclub.com/019db096-d966-7e5a-9882-bcdcac8dcf61/image.png)
+
+---
+
+## Add Your Files to Your GitHub Repo
+
+Now it is time to order your board. Get the following files from your project:
+
+- **A screenshot of your 3D view**
+  - In PCB Editor: **View → 3D Viewer → Edit → Copy 3D Image**
+- `.kicad_pro` (KiCad project file)
+- `.kicad_sch` (schematic)
+- `.kicad_pcb` (PCB layout)
+- **Your Gerber files** (see below)
+
+How do I export Gerber files?
+
+> 1. In your PCB editor: **File → Fabrication Outputs → Gerbers (.gbr)**
+> 2. Set an output folder (e.g., a new "Gerbers" folder)
+> 3. Select necessary layers (generally already selected)
+> 4. Click **Plot**
+> 5. Click **Generate Drill Files**
+> 6. Zip the resulting files for your manufacturer
+>
+> Gerber files are the industry-standard format that PCB manufacturers use to fabricate your board. They contain the copper layers, silkscreen, solder mask, drill locations, and board outline.
+
+---
+
+## Upload Your Files to GitHub
+
+Go back to the GitHub repo you created at the start. Click **Add File → Upload files**.
+
+Drag in your:
+
+- Screenshot of your 3D view
+- `.kicad_pro` (KiCad project file)
+- `.kicad_sch` (schematic)
+- `.kicad_pcb` (PCB layout)
+- Gerbers (zipped)
+
+You should have downloaded all of these in the previous step.
+
+Click to commit your changes.
+
+### Edit Your README
+
+Finally, edit your README to include the submission requirements:
+
+- A short description of what your project is
+- A couple sentences on why you made the project
+- A couple sentences on how to use your project
+
+**Pictures of your project:**
+
+- A screenshot of a full 3D model of your project
+- A screenshot of your PCB, if you have one
+- A wiring diagram, if you're doing any wiring that isn't on a PCB
+
+**A BOM (Bill of Materials) in table format at the end of the README, with links.**
+
+> **NOTE:** ALL projects you make for Blueprint must have a project photo in your README.
+
+---
+
+## Getting a JLCPCB Price
+
+Go to [jlcpcb.com](https://jlcpcb.com/) and make an account. Then, add your Gerber file for the instant quote.
+
+![JLCPCB upload](https://cdn.hackclub.com/019c5535-24e8-75f6-b7c0-adec3e312dc5/baaa0ca887d51110c30cba9d862968acbef618f8_image.webp)
+
+### Settings
+
+You should keep the default settings for everything. The only thing you should/can change is the **PCB Color**. I did black as seen below:
+
+![PCB color](https://cdn.hackclub.com/019d69c3-8a8d-72bd-b620-ac8daa1d780e/image.png)
+
+For high-spec options, also keep the default. **Do not** click PCB assembly! 
+
+![High-spec options](https://cdn.hackclub.com/019c5535-28a4-787e-8bf4-ba4fcbce1653/053061912ca84c66c46323ccef5b12cb71c7d721_image.webp)
+
+Once you have successfully *not* changed any of the settings (except the board color), on the right, change the shipping method to **Global Standard Direct** (or **Air Registered Mail** if it is cheaper).
+
+---
+
+## Designing the Case
+
+Export the PCB from KiCad into your CAD platform! For me, this is Onshape.
+
+**Check [this amazing onshape tutorial](https://www.youtube.com/watch?v=d4QzBdcQoe0&list=PLGqRUdq5ULsMDOxmu10AGPDIOkzNYu7D7&index=2)!**
+
+I googled and found headers! I found this from [here](https://www.3dcontentcentral.com/download-model.aspx?catalogid=171&id=1025256)!
+
+I then experimented with the CAD a lot. I used revolve, but it did not look nice and was hard to use. I also tried multiple placements for the battery and found it was optimal if it's placed vertically.
+
+To make these, I created a sketch by clicking the sketch button in the upper-left-hand side and made multiple shapes that include tolerance and my shell size.
+
+![](https://cdn.hackclub.com/019c5c8f-7d48-7dc5-9f80-8dcef93f84e0/image.png)
+
+![](https://cdn.hackclub.com/019c5985-794b-78d8-bbec-b885edabe178/image.png)
+
+![](https://cdn.hackclub.com/019c5983-207f-747f-b33a-d92806aac17e/image.png)
+
+I also decided to change the PCB to add the vibration motor to the back and raise the screen!
+
+From
+
+![](https://cdn.hackclub.com/019c59d1-a434-7b99-a5bf-7d486ab388f6/image.png)
+
+to
+
+![](https://cdn.hackclub.com/019c59cf-3ea1-7c97-8367-5ef8e0558b2a/image.png)
+
+My headers overlapped with the buzzer, so I decided to reposition the buzzer to the middle of the board! The gap between the LCD and the headers should give me enough space!
+
+![example](https://cdn.hackclub.com/019c5a0c-fc35-7127-b439-55fb132f13c3/image.png)
+
+I made the back portion with 3D-printed standoffs and added large fillets to round the edges. I made the top part and added some tolerance between the top of the plate and the bottom of the top half of the case!
+
+![](https://cdn.hackclub.com/019c5c85-9499-7b71-b5ed-3d3325909b62/image.png)
+
+I added a hole for the battery and a hole for the USB-C. Generally, there may be issues printing this, but for this small amount of bridging there shouldn't be any issues!
+
+I also made sure to add an offset to the USB C! The USB-C I measured with my calipers was 7 mm x 13 mm about, would reccomend making it bigger just in case by ~ 1 mm. If you have a 3d printer, you can just test values yourself! My values worked for me (12.5 x 7.5 mm, athough they are pretty tight, **I would def make it a little bigger**)
+
+![](https://cdn.hackclub.com/019c5c85-ee74-7721-ab42-03937224ebe6/image.png)
+
+![](https://cdn.hackclub.com/019c5c87-d8d2-7de5-bc94-b7690c845c4c/image.png)
+
+Finally, I used the section view tool to confirm that there is no overlapping:
+
+![](https://cdn.hackclub.com/019c5c89-1791-78d6-9b35-902744dcb72a/image.png)
+
+Now, my design is finished! I uploaded all necessary files to my GitHub repo. 
+
+**Note: Design is an iterative process. I spent about 20+ hours manually adjusting everything to look as pretty as possible! But don't worry, #fallout is here to guide you! This is a normal process and you are not alone.**
+
+I recommend **not** following the above 1:1; this was my process, and it will differ greatly from yours!
+
+I also recommend checking my [Onshape](https://cad.onshape.com/documents/fa5791d8e7f345b436054923/w/ad8e09905eb572b0a8a40e9d/e/e81f06aa82a76dd04f8e6832?renderMode=0&uiState=6990af61d8ec4667253f72ea) for inspiration! Check my feature tree and see my iterations yourself.
+
+> **A Note:**
+>
+> This project took me way longer than expected, and that's completely normal.
+>
+> My 3D printer wouldn't connect to the network, then had config issues once it did. I spent hours trying to flash my XIAO to the wrong COM port before realizing the flashing process had changed. A button stopped working after soldering, and while trying to fix it I accidentally shorted something on the XIAO, which took a few more hours to debug and desolder.
+>
+> None of this means you did something wrong. You got this!
+>
+> The biggest thing I learned: if you're stuck on something that feels like it's eating hours with no end in sight, it's often faster to find a completely different approach than to keep pushing through. Flashing not working? Try a different method. Component not desoldering cleanly? Maybe there's a workaround that doesn't require removing it at all. The path forward usually exists, it just might not be the one you started on.
+>
+> You've got the whole Fallout community to ask for help :D
+
+Enjoy making :D!
