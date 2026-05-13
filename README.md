@@ -4,7 +4,7 @@
 [![Onshape](https://img.shields.io/badge/Onshape-CAD%20Design-00B0F0?style=for-the-badge&logo=onshape&logoColor=white)](https://www.onshape.com)
 [![ESP32](https://img.shields.io/badge/ESP32--C6-Firmware-E7352C?style=for-the-badge&logo=espressif&logoColor=white)](https://www.espressif.com)
 
-![Boing virtual pet](assets/images/hero.png)
+![Boing virtual pet](https://user-cdn.hackclub-assets.com/019c61d4-620e-7542-a8d1-97414da3658a/image_2.png)
 
 A handheld virtual pet built from scratch — custom PCB, 3D-printed enclosure, and C++ firmware running on a XIAO-ESP32-C6. Feed it, play with it, put it to sleep. Neglect it and it sulks.
 
@@ -64,25 +64,25 @@ Stats decay continuously. Decay accelerates as a stat drops — a starving pet g
 
 The board is a two-layer design made in KiCad. Order from JLCPCB using the files in `hardware/pcb/` — the Gerbers are ready to go.
 
-![PCB layout](assets/images/pcb_layout.png)
+![PCB layout](https://cdn.hackclub.com/019c6204-37f0-7f26-b799-d78033114914/image.png)
 
-![PCB 3D front](assets/images/pcb_3d_front.png) ![PCB 3D back](assets/images/pcb_3d_back.png)
+![PCB 3D front](https://cdn.hackclub.com/019c620d-1a3f-7437-9949-082abc42662f/image.png) ![PCB 3D back](https://cdn.hackclub.com/019c620d-85d2-77bf-ab17-89be2fc27427/image.png)
 
 ### Schematic
 
-![Schematic](assets/images/schematic.png)
+![Schematic](https://cdn.hackclub.com/019c63fe-8ef9-76ef-9bf1-9b4166a678af/image.png)
 
 ### Enclosure
 
 The shell is designed in Onshape and printed in two halves held together with M3 screws and brass inserts.
 
-![Enclosure front](assets/images/enclosure_front.png) ![Enclosure CAD](assets/images/enclosure_cad.png)
+![Enclosure front](https://cdn.hackclub.com/019c5fac-e06f-7e0d-a838-a7901d9d6536/image.png) ![Enclosure CAD](https://cdn.hackclub.com/019c5fac-ddf2-7757-8007-5006abfd3ed3/image.png)
 
 [Open in Onshape](https://cad.onshape.com/documents/fa5791d8e7f345b436054923/w/ad8e09905eb572b0a8a40e9d/e/e81f06aa82a76dd04f8e6832)
 
 ### Assembly
 
-![Assembly diagram](assets/images/assembly.png)
+![Assembly diagram](https://cdn.hackclub.com/019c5fac-e2db-73dc-9d46-40b499d3461a/image.png)
 
 Full step-by-step instructions are in [docs/build_guide.md](docs/build_guide.md).
 
